@@ -62,8 +62,10 @@ app.MapGet("animals/{id:int}", (IConfiguration configuration,int id) =>
         
     }
 });
-app.MapPost("animals", (CreateAnimalRequest request) =>
+app.MapPost("animals", (CreateAnimalRequest request, IValidator<CreateAnimalRequest> validator) =>
 {
+    var validation = validator.Validate(request);
+    if (!validation.IsValid) return Results.ValidationProblem(validation.ToDictionary());
     using (var sqlConnection = new SqlConnection("Server=localhost,1433;Database=Animals;User Id=SA;Password=yourStrong(!)Password;")){
         var sqlCommand = new SqlCommand("INSERT INTO Animal (Name, Description,Category,Area) VALUES (@name,@desc,@cat,@area)", sqlConnection);
         sqlCommand.Parameters.AddWithValue("@name", request.Name);
@@ -74,5 +76,34 @@ app.MapPost("animals", (CreateAnimalRequest request) =>
         sqlCommand.ExecuteNonQuery();
         return Results.Created("", null);
     }
+});
+app.MapDelete("animals/id{int}", (IConfiguration configuration,int id) =>
+{
+    using (var sqlConnection =
+           new SqlConnection("Server=localhost,1433;Database=Animals;User Id=SA;Password=yourStrong(!)Password;"))
+    {
+        var sqlCommand = new SqlCommand("DELETE FROM Animal WHERE ID=@id", sqlConnection);
+        sqlCommand.Parameters.AddWithValue("@id", id);
+        sqlCommand.Connection.Open();
+        sqlCommand.ExecuteNonQuery();
+        return Results.Ok();
+    }
+});
+app.MapPut("animals/id{int}", (IConfiguration conf, int id,CreateAnimalRequest request, IValidator<CreateAnimalRequest> validator) =>
+{
+    var validation = validator.Validate(request);
+    if (!validation.IsValid) return Results.ValidationProblem(validation.ToDictionary());
+    using (var sqlConnection = new SqlConnection("Server=localhost,1433;Database=Animals;User Id=SA;Password=yourStrong(!)Password;")){
+        var sqlCommand = new SqlCommand("UPDATE Animal SET Name=@name, Description = @desc, Category = @cat, Area = @area WHERE ID = @id", sqlConnection);
+        sqlCommand.Parameters.AddWithValue("@name", request.Name);
+        sqlCommand.Parameters.AddWithValue("@desc", request.Desc);
+        sqlCommand.Parameters.AddWithValue("@cat", request.Category);
+        sqlCommand.Parameters.AddWithValue("@area", request.Area);
+        sqlCommand.Parameters.AddWithValue("@id", id);
+        sqlCommand.Connection.Open();
+        sqlCommand.ExecuteNonQuery();
+        return Results.NoContent();
+    }
+    
 });
 app.Run();
