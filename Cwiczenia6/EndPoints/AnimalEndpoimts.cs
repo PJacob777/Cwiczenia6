@@ -8,7 +8,7 @@ public static class AnimalEndpoimts
 {
     public static void RegisterEndPointsAnimal(this WebApplication app)
     {
-        app.MapGet("animals", (IConfiguration configuration) =>
+        app.MapGet("/api/animals", (IConfiguration configuration) =>
             {
                 var animals = new List<GetAnimalResponse>();
                 using (var sqlConnection = new SqlConnection("Server=localhost,1433;Database=Animals;User Id=SA;Password=yourStrong(!)Password;")){
@@ -30,7 +30,7 @@ public static class AnimalEndpoimts
 
                 return Results.Ok(animals);
             });
-        app.MapGet("animals/{id:int}", (IConfiguration configuration,int id) =>
+        app.MapGet("/api/animals/{id:int}", (IConfiguration configuration,int id) =>
             {
                 using (var sqlConnection = new SqlConnection("Server=localhost,1433;Database=Animals;User Id=SA;Password=yourStrong(!)Password;")){
                     var sqlCommand = new SqlCommand("SELECT * FROM Animal WHERE ID=@id", sqlConnection);
@@ -50,7 +50,7 @@ public static class AnimalEndpoimts
                     
                 }
             });
-        app.MapPost("animals", (CreateAnimalRequest request, IValidator<CreateAnimalRequest> validator) =>
+        app.MapPost("/api/animals", (CreateAnimalRequest request, IValidator<CreateAnimalRequest> validator) =>
             {
                 var validation = validator.Validate(request);
                 if (!validation.IsValid) return Results.ValidationProblem(validation.ToDictionary());
@@ -65,7 +65,7 @@ public static class AnimalEndpoimts
                     return Results.Created("", null);
                 }
             });
-        app.MapDelete("animals/id{int}", (IConfiguration configuration,int id) =>
+        app.MapDelete("/api/animals/id{int}", (IConfiguration configuration,int id) =>
             {
                 using (var sqlConnection =
                        new SqlConnection("Server=localhost,1433;Database=Animals;User Id=SA;Password=yourStrong(!)Password;"))
@@ -77,7 +77,7 @@ public static class AnimalEndpoimts
                     return Results.Ok();
                 }
             });
-        app.MapPut("animals/id{int}", (IConfiguration conf, int id,CreateAnimalRequest request, IValidator<CreateAnimalRequest> validator) =>
+        app.MapPut("/api/animals/id{int}", (IConfiguration conf, int id,CreateAnimalRequest request, IValidator<CreateAnimalRequest> validator) =>
             {
                 var validation = validator.Validate(request);
                 if (!validation.IsValid) return Results.ValidationProblem(validation.ToDictionary());
@@ -94,7 +94,7 @@ public static class AnimalEndpoimts
                 }
                 
             });
-        app.MapGet("animals/orderBy{string}", (IConfiguration configuration,string orderBy) =>
+        app.MapGet("/api/animals/orderBy{string}", (IConfiguration configuration,string orderBy) =>
             {
                 var animals = new List<GetAnimalResponse>();
                 
